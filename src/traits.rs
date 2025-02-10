@@ -48,10 +48,10 @@ pub trait UnionFind<V: Union>: FromIterator<V> + Extend<V> + Sized {
     fn union(&mut self, key0: usize, key1: usize) -> bool;
 
     /// Returns the identifier of the set that the key belongs to.
-    fn find(&mut self, key: usize) -> usize;
+    fn find(&self, key: usize) -> usize;
 
     /// Returns the reference to the value of the set that the key belongs to.
-    fn get(&mut self, key: usize) -> &V;
+    fn get(&self, key: usize) -> &V;
 
     /// Returns the mutable reference to the value of the set that the key belongs to.
     fn get_mut(&mut self, key: usize) -> &mut V;

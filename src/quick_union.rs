@@ -5,13 +5,15 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
+use dashmap::DashMap;
+
 use crate::{Union, UnionFind, UnionResult};
 use std::iter::FromIterator;
 
 /// Union-Find implementation with quick union operation.
 #[derive(Debug)]
 pub struct QuickUnionUf<V> {
-    link_parent: Vec<usize>,
+    link_parent: DashMap<usize, usize>,
     payload: Vec<Option<V>>,
 }
 
@@ -40,7 +42,7 @@ impl<V: Union> UnionFind<V> for QuickUnionUf<V> {
     #[inline]
     fn insert(&mut self, data: V) -> usize {
         let key = self.payload.len();
-        self.link_parent.push(key);
+        let _ = self.link_parent.insert(key, key);
         self.payload.push(Some(data));
         key
     }
@@ -62,18 +64,18 @@ impl<V: Union> UnionFind<V> for QuickUnionUf<V> {
             UnionResult::Right(val) => (k1, k0, val),
         };
         self.payload[parent] = Some(val);
-        self.link_parent[child] = parent;
+        let _ = self.link_parent.insert(child, parent);
 
         true
     }
 
     #[inline]
-    fn find(&mut self, key: usize) -> usize {
+    fn find(&self, key: usize) -> usize {
         let mut k = key;
-        let mut p = self.link_parent[k];
+        let mut p = *self.link_parent.get(&k).unwrap();
         while p != k {
-            let pp = self.link_parent[p];
-            self.link_parent[k] = pp;
+            let pp = *self.link_parent.get(&p).unwrap();
+            let _ = self.link_parent.insert(k, pp);
             k = p;
             p = pp;
         }
@@ -81,7 +83,7 @@ impl<V: Union> UnionFind<V> for QuickUnionUf<V> {
     }
 
     #[inline]
-    fn get(&mut self, key: usize) -> &V {
+    fn get(&self, key: usize) -> &V {
         let root_key = self.find(key);
         self.payload[root_key].as_ref().unwrap()
     }
@@ -97,7 +99,7 @@ impl<A: Union> FromIterator<A> for QuickUnionUf<A> {
     #[inline]
     fn from_iter<T: IntoIterator<Item = A>>(iterator: T) -> QuickUnionUf<A> {
         let mut uf = QuickUnionUf {
-            link_parent: vec![],
+            link_parent: Default::default(),
             payload: vec![],
         };
         uf.extend(iterator);
@@ -116,6 +118,6 @@ impl<A> Extend<A> for QuickUnionUf<A> {
         self.payload.extend(payload);
 
         let new_len = self.payload.len();
-        self.link_parent.extend(len..new_len);
+        self.link_parent.extend((len..new_len).map(|x| (x, x)));
     }
 }

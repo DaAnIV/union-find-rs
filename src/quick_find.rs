@@ -104,12 +104,12 @@ impl<V: Union> UnionFind<V> for QuickFindUf<V> {
     }
 
     #[inline]
-    fn find(&mut self, key: usize) -> usize {
+    fn find(&self, key: usize) -> usize {
         self.link_root[key]
     }
 
     #[inline]
-    fn get(&mut self, key: usize) -> &V {
+    fn get(&self, key: usize) -> &V {
         let root_key = self.find(key);
         &self.payload[root_key].as_ref().unwrap().data
     }

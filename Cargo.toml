@@ -19,6 +19,9 @@ maintenance = { status = "passively-maintained" }
 name = "bench"
 harness = false
 
+[dependencies]
+dashmap = "*"
+
 [dev-dependencies]
 criterion = "0.5.1"
 
